@@ -160,5 +160,15 @@ def interface(image) :
     model.setInputSize([w, h])
     results = model.infer(image)
 
-    print(results)
-    return results
+    if results is None:
+        return None
+    results = [int (i) for i in results[0]]
+
+
+    x1 = results[0]
+    y1 = results[1]
+    x2 = results[0] + results[2]
+    y2 = results[1] + results[3]
+
+    confidence = results[13]
+    return x1, y1, x2, y2, confidence
