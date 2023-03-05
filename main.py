@@ -1,22 +1,65 @@
 from fastapi import FastAPI, Request
 import cv2 as cv
 import urllib.request
-
+from urllib.request import Request as req
+opener = urllib.request.build_opener()
+opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'), ('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'), ('Accept-Encoding','gzip, deflate, br'),\
+    ('Accept-Language','en-US,en;q=0.5' ), ("Connection", "keep-alive"), ("Upgrade-Insecure-Requests",'1')]
+urllib.request.install_opener(opener)
 
 import yunet
 import mediapipee
 import haar
 import age_gender
+#import detector
 
 
-app = FastAPI()
 
 
-@app.post("/cv")
+
+description = """
+ChimichangApp API helps you do awesome stuff. 🚀
+
+## Items
+
+You can **read items**.
+
+## Users
+
+You will be able to:
+
+* **Create users** (_not implemented_).
+* **Read users** (_not implemented_).
+"""
+app = FastAPI(
+    title="Fake Profile Detection API",
+    description=description,
+    version="0.0.1",
+    terms_of_service="http://example.com/terms/",
+    contact={
+        "name": "Deadpoolio the Amazing",
+        "url": "http://x-force.example.com/contact/",
+        "email": "dp@x-force.example.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+@app.post("/yunet")
 async def root(data: Request):
     req_info = await data.json()
 
-    urllib.request.urlretrieve(req_info['url'], "samkjple.png")
+    # r = req(
+    # url=req_info['url'],
+    # headers={'User-Agent': 'Mozilla/5.0'}
+    # )
+    urllib.request.urlretrieve(req_info['url'], "sample.png")
     img = cv.imread("sample.png")
 
     if img is None : 
@@ -83,7 +126,7 @@ async def root(data: Request):
 
 
 
-@app.post('/age')
+@app.post('/gender')
 async def root(data: Request):
     req_info = await data.json()
 
@@ -99,3 +142,21 @@ async def root(data: Request):
         return {"message": "No faces found"}
 
     return {"message": "faces found", "gender" : results[0], "age":results[1], "bounding boxes": results[2]}
+
+
+@app.post('/fakedetector')
+async def root(data: Request):
+    req_info = await data.json()
+
+    urllib.request.urlretrieve(req_info['url'], "sample.png")
+    img = cv.imread("sample.png")
+
+    if img is None :
+        return {"message": "Image not found"}
+    
+    results = detector.detect()
+
+    if results :
+        return {"message": "Cartoon Image"}
+
+    return {"message": "Non-Cartoon Image"}
