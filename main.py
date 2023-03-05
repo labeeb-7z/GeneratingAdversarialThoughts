@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
 import cv2 as cv
 import urllib.request
 from urllib.request import Request as req
+import base64
+
 opener = urllib.request.build_opener()
 opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'), ('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'), ('Accept-Encoding','gzip, deflate, br'),\
     ('Accept-Language','en-US,en;q=0.5' ), ("Connection", "keep-alive"), ("Upgrade-Insecure-Requests",'1')]
@@ -11,41 +14,31 @@ import yunet
 import mediapipee
 import haar
 import age_gender
-#import detector
+import detector
+import catfish
+from fastapi.middleware.cors import CORSMiddleware
 
 
 
 
 
-description = """
-ChimichangApp API helps you do awesome stuff. 🚀
 
-## Items
+app = FastAPI()
+origins = [
+    "*"
+]
 
-You can **read items**.
-
-## Users
-
-You will be able to:
-
-* **Create users** (_not implemented_).
-* **Read users** (_not implemented_).
-"""
-app = FastAPI(
-    title="Fake Profile Detection API",
-    description=description,
-    version="0.0.1",
-    terms_of_service="http://example.com/terms/",
-    contact={
-        "name": "Deadpoolio the Amazing",
-        "url": "http://x-force.example.com/contact/",
-        "email": "dp@x-force.example.com",
-    },
-    license_info={
-        "name": "Apache 2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
-    },
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+
+
+
 
 @app.get("/")
 async def root():
@@ -80,8 +73,12 @@ async def root(data: Request):
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
+    with open('result.jpg', 'rb') as f:
+        base64image = base64.b64encode(f.read())
+    # return base64image
+    # return FileResponse('result.jpg')
 
-    return {"message": "faces found", "x1": results[0], "y1": results[1], "x2": results[2], "y2": results[3], "confidence": results[4]}
+    return {"base64":base64image,"message": "faces found", "x1": results[0], "y1": results[1], "x2": results[2], "y2": results[3], "confidence": results[4]}
     
 
 
@@ -160,3 +157,14 @@ async def root(data: Request):
         return {"message": "Cartoon Image"}
 
     return {"message": "Non-Cartoon Image"}
+
+
+@app.post('/catfish')
+async def root(data: Request):
+    req_info = await data.json()
+
+    result = catfish.interface(req_info['url'])
+    print(result)
+    return result
+
+    

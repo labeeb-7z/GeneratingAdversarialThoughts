@@ -56,16 +56,15 @@ def visualize(image, results, box_color=(0, 255, 0), text_color=(0, 0, 255), fps
     if fps is not None:
         cv.putText(output, 'FPS: {:.2f}'.format(fps), (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, text_color)
 
-    for det in (results if results is not None else []):
-        bbox = det[0:4].astype(np.int32)
-        cv.rectangle(output, (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3]), box_color, 2)
+    bbox=results[0:4]
+    cv.rectangle(output, (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3]), box_color, 2)
 
-        conf = det[-1]
-        cv.putText(output, '{:.4f}'.format(conf), (bbox[0], bbox[1]+12), cv.FONT_HERSHEY_DUPLEX, 0.5, text_color)
+    # conf = det[-1]
+    # cv.putText(output, '{:.4f}'.format(conf), (bbox[0], bbox[1]+12), cv.FONT_HERSHEY_DUPLEX, 0.5, text_color)
 
-        landmarks = det[4:14].astype(np.int32).reshape((5,2))
-        for idx, landmark in enumerate(landmarks):
-            cv.circle(output, landmark, 2, landmark_color[idx], 2)
+    # landmarks = det[4:14].astype(np.int32).reshape((5,2))
+    # for idx, landmark in enumerate(landmarks):
+    #     cv.circle(output, landmark, 2, landmark_color[idx], 2)
 
     return output
 
@@ -170,5 +169,10 @@ def interface(image) :
     x2 = results[0] + results[2]
     y2 = results[1] + results[3]
 
-    confidence = results[13]
+    o = visualize(image, results)
+
+    #save o
+    cv.imwrite('result.jpg', o)
+
+    confidence = results[13]/100
     return x1, y1, x2, y2, confidence

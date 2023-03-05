@@ -12,16 +12,29 @@ function App() {
   const [tweet, setTweet] = useState(null);
 
   const [loading, setLoading] = useState(false);
-
+  const [output, setOutput] = useState(null);
+  const [im, setim] = useState(null);
   const [url, setUrl] = useState(null);
-
+  console.log(model)
   const submitHandler = () => {
-    alert("foo")
+    
+    axios
+      .post(`http://127.0.0.1:8000${model}`, {
+        url: url
+      })
+      .then((response) => {
+        console.log(response.data)
+        // setim(response.data['base64'])
+        setOutput(JSON.stringify(response.data, null, 2))
+        // setOutput(output.replace(/['"]+/g, ''))
+        // console.log(JSON.stringify(response.data))
+        // setOutput(JSON.stringify(response.data, null, 2))
+      });
   }
   const instaHandler = async () => {
     setLoading(true)
     axios
-      .post("http://127.0.0.1:8000/insta", {
+      .post("http://0.0.0.0:7900/insta", {
         username: insta
       })
       .then((response) => {
@@ -35,7 +48,7 @@ function App() {
   const twitterHandler = () => {
     setLoading(true)
     axios
-      .post("http://127.0.0.1:8000/tweet", {
+      .post("http://0.0.0.0:7900/tweet", {
         username: tweet
       })
       .then((response) => {
@@ -145,14 +158,28 @@ function App() {
           <select id="countries" value={model} onChange={(e) => setModel(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             <option>Select a model</option>
             <option value="/mp">Mediapipe</option>
-            <option value="/cv">Cv</option>
+            <option value="/yunet">Cv</option>
             <option value="/haar">Haar Cascade</option>
+            <option value="/gender">Age and Gender</option>
+            <option value="/fakedetector">False positive</option>
+            <option value="/catfish">Catfish</option>
           </select>
         </div>
 
         {
           <div className='w-[8rem] mx-auto mt-10 mb-5'>
             <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={submitHandler}>Get Results</button>
+          </div>
+        }
+        {output && 
+          <div className='border rounded-md border-gray-300 w-[40rem] mx-auto my-10'>
+            <div className='flex justify-between'>
+              <h1 className="text-lg m-3">Json Response</h1>
+            </div>
+            <div>
+              <textarea value={output} id="message" rows="9" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="json response goes here ..."></textarea>
+            </div>
+            {<img   src={`data:image/jpeg;base64,${im}`} />}
           </div>
         }
         {
